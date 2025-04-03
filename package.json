@@ -3,17 +3,24 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js", // Start the backend server
+    "dev": "nodemon index.js", // Use nodemon during development for backend
+    "build": "react-scripts build", // Build the React frontend
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "frontend-start": "react-scripts start" // For running the React app locally during development
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A subscription service with login and subscription features.",
   "dependencies": {
     "body-parser": "^2.2.0",
     "express": "^5.1.0",
     "stripe": "^18.0.0",
-    "tedious": "^18.6.1"
+    "tedious": "^18.6.1",
+    "react": "^18.0.0", // Core React library
+    "react-dom": "^18.0.0", // React DOM rendering
+    "react-scripts": "^5.0.1" // For building and running React apps
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
