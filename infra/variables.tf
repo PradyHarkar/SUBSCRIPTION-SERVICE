@@ -1,6 +1,6 @@
 variable "resource_group_name" {
   description = "Name of the Resource Group"
-  default     = "StartupRG"
+  default     = "SubservRG"
 }
 
 variable "location" {
@@ -10,12 +10,12 @@ variable "location" {
 
 variable "app_service_plan_name" {
   description = "App Service Plan name"
-  default     = "StartupAppServicePlan"
+  default     = "SubservAppServPlan"
 }
 
 variable "app_name" {
   description = "Web App name"
-  default     = "StartupAppService"
+  default     = "SubServApp"
 }
 
 variable "runtime_stack" {
@@ -30,7 +30,7 @@ variable "db_server_name" {
 
 variable "db_name" {
   description = "Database name"
-  default     = "startupdb"
+  default     = "subserviceDB"
 }
 
 variable "admin_username" {
@@ -40,13 +40,13 @@ variable "admin_username" {
 
 variable "admin_password" {
   description = "Database admin password"
-  default     = null
+  default     = "DevDBKVChange1!"
 }
 
 variable "common_tags" {
   description = "Tags for Azure resources"
   default     = {
-    Environment = "Startup"
+    Environment = "Dev"
     Owner       = "Pradyumna"
   }
 }

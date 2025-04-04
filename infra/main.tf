@@ -1,99 +1,58 @@
-# Provider Configuration
+# Azure Provider Configuration
 provider "azurerm" {
   features {}
+  subscription_id = "26801b16-02f0-458e-8e42-863e8c56e2f8"
 }
+
+# Data Source for Tenant Information
+data "azurerm_client_config" "current" {}
 
 # Resource Group
-resource "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
-  location = var.location
+resource "azurerm_resource_group" "subscription_rg" {
+  name     = "subscriptionservicerg"
+  location = "East US" # Update to your preferred Azure region
 }
 
-# App Service Plan (Cost-Effective SKU: Free Tier F1)
-resource "azurerm_app_service_plan" "app_service_plan" {
-  name                = var.app_service_plan_name
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  sku {
-    tier     = "Free"
-    size     = "F1"
-    capacity = 1
-  }
+# Service Plan (Corrected)
+resource "azurerm_service_plan" "app_service_plan" {
+  name                = "subscriptionserviceplan"
+  resource_group_name = azurerm_resource_group.subscription_rg.name
+  location            = azurerm_resource_group.subscription_rg.location
+  os_type             = "Linux" # Specify 'Linux' or 'Windows' based on requirements
+  sku_name            = "S1"    # Standard tier, S1 size
 }
 
-# Web App
-resource "azurerm_app_service" "app_service" {
-  name                = var.app_name
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  site_config {
-    linux_fx_version = var.runtime_stack
-  }
-
-  tags = var.common_tags
-}
-
-# Key Vault (for storing sensitive data)
+# Key Vault (Corrected)
 resource "azurerm_key_vault" "key_vault" {
-  name                = "${var.resource_group_name}-vault"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
+  name                = "subscriptionservicekeyvault"
+  location            = "eastus"
+  resource_group_name = azurerm_resource_group.subscription_rg.name
 
-  sku {
-    name = "standard"
-  }
+  sku_name            = "standard"
+  tenant_id           = data.azurerm_client_config.current.tenant_id
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = data.azurerm_client_config.current.object_id
-    permissions {
-      secrets = ["get", "list", "set", "delete"]
-    }
+
+    secret_permissions = ["Get", "List", "Set", "Delete"]
   }
-
-  tags = var.common_tags
 }
 
-# SQL Database (Basic Tier)
-resource "azurerm_sql_server" "sql_server" {
-  name                         = var.db_server_name
-  location                     = azurerm_resource_group.rg.location
-  resource_group_name          = azurerm_resource_group.rg.name
-  administrator_login          = var.admin_username
-  administrator_login_password = var.admin_password
+# SQL Server (Corrected)
+resource "azurerm_mssql_server" "sql_server" {
+  name                         = "subscriptionservicesqlserver"
+  resource_group_name          = azurerm_resource_group.subscription_rg.name
+  location                     = azurerm_resource_group.subscription_rg.location
+  version                      = "12.0"
+  administrator_login          = "sqladmin"
+  administrator_login_password = "securepassword123!" # Ensure secure password
 }
 
-resource "azurerm_sql_database" "sql_database" {
-  name                = var.db_name
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  server_name         = azurerm_sql_server.sql_server.name
-
-  sku {
-    name = "Basic"
-    tier = "Basic"
-    capacity = 5
-  }
-
-  tags = var.common_tags
-}
-
-# Output Variables
-output "app_service_url" {
-  value = azurerm_app_service.app_service.default_site_hostname
-}
-
-output "key_vault_name" {
-  value = azurerm_key_vault.key_vault.name
-}
-
-output "sql_server_url" {
-  value = azurerm_sql_server.sql_server.fully_qualified_domain_name
+# SQL Database (Corrected)
+resource "azurerm_mssql_database" "sql_database" {
+  name        = "subscriptionservicedb"
+  server_id   = azurerm_mssql_server.sql_server.id
+  sku_name    = "S0" # Define the Standard performance tier
+  max_size_gb = 10
 }
