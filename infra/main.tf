@@ -24,7 +24,7 @@ resource "azurerm_service_plan" "app_service_plan" {
 
 # Key Vault (Corrected)
 resource "azurerm_key_vault" "key_vault" {
-  name                = "subscriptionservicekeyvault"
+  name                = "subservicevault"
   location            = "eastus"
   resource_group_name = azurerm_resource_group.subscription_rg.name
 
