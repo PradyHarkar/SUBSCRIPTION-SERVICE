@@ -1,53 +1,36 @@
 trigger:
-- main
+- feature/test-branch  # Replace with your branch name
 
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  acrName: '<your-acr-name>'
+  imageName: 'react-app'
+
 steps:
-# Install Terraform
-- script: |
-    sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl
-    curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-    sudo apt-get update && sudo apt-get install terraform
-  displayName: 'Install Terraform'
-
-# Terraform Initialization
-- script: |
-    terraform init
-  workingDirectory: infra
-  displayName: 'Terraform Init'
-
-# Terraform Apply
-- script: |
-    terraform apply -auto-approve
-  workingDirectory: infra
-  displayName: 'Terraform Apply'
-
-# App Deployment
-- task: NodeTool@0
+# Step 1: Login to Azure
+- task: AzureCLI@2
   inputs:
-    versionSpec: '16.x'
-  displayName: 'Install Node.js'
+    azureSubscription: '<your-service-connection>'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az aks get-credentials --resource-group <your-resource-group> --name <your-aks-cluster-name>
 
+# Step 2: Build Docker Image
 - script: |
-    npm install
-    npm run build
-  displayName: 'Build React App'
+    docker build -t $(acrName).azurecr.io/$(imageName):$(Build.BuildId) .
+  displayName: 'Build Docker Image'
 
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: '$(System.DefaultWorkingDirectory)/build'
-    includeRootFolder: false
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/ReactApp.zip'
-    replaceExistingArchive: true
-  displayName: 'Archive Build Output'
+# Step 3: Push Docker Image to ACR
+- script: |
+    az acr login --name $(acrName)
+    docker push $(acrName).azurecr.io/$(imageName):$(Build.BuildId)
+  displayName: 'Push Docker Image to ACR'
 
-- task: AzureWebApp@1
-  inputs:
-    azureSubscription: '<Your-Service-Connection>'
-    appName: 'StartupAppService'
-    package: '$(Build.ArtifactStagingDirectory)/ReactApp.zip'
-  displayName: 'Deploy React App'
+# Step 4: Deploy to Kubernetes
+- script: |
+    kubectl apply -f k8s/deployment.yaml
+    kubectl apply -f k8s/service.yaml
+  displayName: 'Deploy to Kubernetes'
