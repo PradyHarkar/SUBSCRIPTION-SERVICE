@@ -5,7 +5,7 @@ variable "resource_group_name" {
 
 variable "location" {
   description = "Azure region for resources"
-  default     = "Australia East"
+  default     = "australiasoutheast"
 }
 
 variable "app_service_plan_name" {
