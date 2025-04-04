@@ -10,7 +10,7 @@ data "azurerm_client_config" "current" {}
 # Resource Group
 resource "azurerm_resource_group" "subscription_rg" {
   name     = "subscriptionservicerg"
-  location = "East US" # Update to your preferred Azure region
+  location = "australiasoutheast" # Update to your preferred Azure region
 }
 
 # Service Plan (Corrected)
@@ -25,7 +25,7 @@ resource "azurerm_service_plan" "app_service_plan" {
 # Key Vault (Corrected)
 resource "azurerm_key_vault" "key_vault" {
   name                = "subservicevault"
-  location            = "eastus"
+  location            = "australiasoutheast"
   resource_group_name = azurerm_resource_group.subscription_rg.name
 
   sku_name            = "standard"
