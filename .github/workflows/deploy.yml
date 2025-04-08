@@ -18,12 +18,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
       
-      - name: Set Working Directory
-        run: cd ./infra # Ensure Terraform commands run in the correct directory
-
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
-
+      
       - name: Set Environment Variables
         run: |
           if [[ "${{ env.ENVIRONMENT }}" == "feature/dev-branch" ]]; then
@@ -45,6 +42,8 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: ./infra # Ensure Terraform runs in the correct directory
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -var "environment=feature/dev-branch"
+        working-directory: ./infra # Ensure Terraform runs in the correct directory
