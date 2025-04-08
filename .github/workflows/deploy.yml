@@ -3,7 +3,7 @@ name: Deploy Infrastructure and App
 on:
   push:
     branches:
-      - dev
+      - feature/dev-branch
       - test
       - main
 
