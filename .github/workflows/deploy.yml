@@ -26,10 +26,10 @@ jobs:
       - name: Set Environment Variables
         run: |
           if [[ "${{ env.ENVIRONMENT }}" == "dev" ]]; then
-            echo "AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID_DEV }}" >> $GITHUB_ENV
-            echo "AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID_DEV }}" >> $GITHUB_ENV
-            echo "AZURE_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}" >> $GITHUB_ENV
-            echo "AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET_DEV }}" >> $GITHUB_ENV
+            echo "AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
+            echo "AZURE_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+            echo "AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
           elif [[ "${{ env.ENVIRONMENT }}" == "test" ]]; then
             echo "AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID_TEST }}" >> $GITHUB_ENV
             echo "AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID_TEST }}" >> $GITHUB_ENV
