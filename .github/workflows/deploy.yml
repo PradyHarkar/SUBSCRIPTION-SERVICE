@@ -12,12 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ENVIRONMENT: ${{ github.ref_name }} # Get branch name (dev, test, or main)
-
-      AZURE_CLIENT_ID: ${{ secrets['AZURE_CLIENT_ID_' + env.ENVIRONMENT] }}
-      AZURE_TENANT_ID: ${{ secrets['AZURE_TENANT_ID_' + env.ENVIRONMENT] }}
-      AZURE_SUBSCRIPTION_ID: ${{ secrets['AZURE_SUBSCRIPTION_ID_' + env.ENVIRONMENT] }}
-      AZURE_CLIENT_SECRET: ${{ secrets['AZURE_CLIENT_SECRET_' + env.ENVIRONMENT] }}
+      ENVIRONMENT: ${{ github.ref_name }} # Automatically gets branch name (e.g., feature/dev-branch)
 
     steps:
       - name: Checkout Code
@@ -25,6 +20,25 @@ jobs:
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
+
+      - name: Set Environment Variables
+        run: |
+          if [[ "${{ env.ENVIRONMENT }}" == "feature/dev-branch" ]]; then
+            echo "AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID_DEV }}" >> $GITHUB_ENV
+            echo "AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID_DEV }}" >> $GITHUB_ENV
+            echo "AZURE_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID_DEV }}" >> $GITHUB_ENV
+            echo "AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET_DEV }}" >> $GITHUB_ENV
+          elif [[ "${{ env.ENVIRONMENT }}" == "test" ]]; then
+            echo "AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID_TEST }}" >> $GITHUB_ENV
+            echo "AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID_TEST }}" >> $GITHUB_ENV
+            echo "AZURE_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID_TEST }}" >> $GITHUB_ENV
+            echo "AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET_TEST }}" >> $GITHUB_ENV
+          elif [[ "${{ env.ENVIRONMENT }}" == "main" ]]; then
+            echo "AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID_MAIN }}" >> $GITHUB_ENV
+            echo "AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID_MAIN }}" >> $GITHUB_ENV
+            echo "AZURE_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID_MAIN }}" >> $GITHUB_ENV
+            echo "AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET_MAIN }}" >> $GITHUB_ENV
+          fi
 
       - name: Terraform Init
         run: terraform init
