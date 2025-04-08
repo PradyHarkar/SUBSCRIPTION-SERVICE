@@ -17,6 +17,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      
+      - name: Set Working Directory
+        run: cd ./infra # Update this path to where your Terraform files are located
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
