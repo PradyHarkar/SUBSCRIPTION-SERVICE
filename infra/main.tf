@@ -9,13 +9,13 @@ data "azurerm_client_config" "current" {}
 
 # Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "rg-${var.environment}-subscriptionservice"
+  name = "rg-${replace(var.environment, "/", "-")}-subscriptionservice"
   location = var.location
 }
 
 # Service Plan
 resource "azurerm_service_plan" "app_service_plan" {
-  name                = "subscriptionserviceplan-${var.environment}"
+  name = "subscriptionserviceplan-${replace(var.environment, "/", "-")}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   os_type             = "Linux" # Specify 'Linux' or 'Windows' based on requirements
@@ -24,7 +24,7 @@ resource "azurerm_service_plan" "app_service_plan" {
 
 # Key Vault
 resource "azurerm_key_vault" "key_vault" {
-  name                = "subservkv-${var.environment}"
+  name = "subservkv-${substr(replace(var.environment, "/", "-"), 0, 15)}"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
 
@@ -41,7 +41,7 @@ resource "azurerm_key_vault" "key_vault" {
 
 # SQL Server
 resource "azurerm_mssql_server" "sql_server" {
-  name                         = "subscriptionservicesqlserver-${var.environment}"
+  name = "subscriptionservicesqlserver-${substr(replace(var.environment, "/", "-"), 0, 15)}"
   resource_group_name          = azurerm_resource_group.main.name
   location                     = azurerm_resource_group.main.location
   version                      = "12.0"
