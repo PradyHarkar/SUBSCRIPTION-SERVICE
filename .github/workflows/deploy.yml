@@ -40,6 +40,10 @@ jobs:
             echo "AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET_MAIN }}" >> $GITHUB_ENV
           fi
 
+      - name: Azure CLI Login
+        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+
       - name: Terraform Init
         run: terraform init
         working-directory: ./infra # Ensure Terraform runs in the correct directory
