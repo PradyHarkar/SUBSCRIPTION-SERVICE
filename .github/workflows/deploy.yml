@@ -6,6 +6,8 @@ on:
       - dev
       - test
       - main
+    paths:
+      - infra/**  # Add the folder path to watch
 
 jobs:
   deploy:
