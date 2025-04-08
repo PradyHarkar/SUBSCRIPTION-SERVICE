@@ -8,7 +8,9 @@ on:
       - main
     paths:
       - infra/**  # Add the folder path to trigger on changes
+  workflow_dispatch: # Allow manual triggering of this workflow
 
+    
 jobs:
   deploy:
     runs-on: ubuntu-latest
