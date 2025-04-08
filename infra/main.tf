@@ -1,35 +1,35 @@
 # Azure Provider Configuration
 provider "azurerm" {
   features {}
-  subscription_id = "26801b16-02f0-458e-8e42-863e8c56e2f8"
+  subscription_id = var.subscription_id
 }
 
 # Data Source for Tenant Information
 data "azurerm_client_config" "current" {}
 
 # Resource Group
-resource "azurerm_resource_group" "subscription_rg" {
-  name     = "subscriptionservicerg"
-  location = "australiasoutheast" # Update to your preferred Azure region
+resource "azurerm_resource_group" "main" {
+  name     = "rg-${var.environment}-subscriptionservice"
+  location = var.location
 }
 
-# Service Plan (Corrected)
+# Service Plan
 resource "azurerm_service_plan" "app_service_plan" {
-  name                = "subscriptionserviceplan"
-  resource_group_name = azurerm_resource_group.subscription_rg.name
-  location            = azurerm_resource_group.subscription_rg.location
+  name                = "subscriptionserviceplan-${var.environment}"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
   os_type             = "Linux" # Specify 'Linux' or 'Windows' based on requirements
   sku_name            = "S1"    # Standard tier, S1 size
 }
 
-# Key Vault (Corrected)
+# Key Vault
 resource "azurerm_key_vault" "key_vault" {
-  name                = "subservicevault"
-  location            = "australiasoutheast"
-  resource_group_name = azurerm_resource_group.subscription_rg.name
+  name                = "subservkv-${var.environment}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
 
-  sku_name            = "standard"
-  tenant_id           = data.azurerm_client_config.current.tenant_id
+  sku_name  = "standard"
+  tenant_id = data.azurerm_client_config.current.tenant_id
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
@@ -39,20 +39,36 @@ resource "azurerm_key_vault" "key_vault" {
   }
 }
 
-# SQL Server (Corrected)
+# SQL Server
 resource "azurerm_mssql_server" "sql_server" {
-  name                         = "subscriptionservicesqlserver"
-  resource_group_name          = azurerm_resource_group.subscription_rg.name
-  location                     = azurerm_resource_group.subscription_rg.location
+  name                         = "subscriptionservicesqlserver-${var.environment}"
+  resource_group_name          = azurerm_resource_group.main.name
+  location                     = azurerm_resource_group.main.location
   version                      = "12.0"
   administrator_login          = "sqladmin"
-  administrator_login_password = "securepassword123!" # Ensure secure password
+  administrator_login_password = "securepassword123!" # Replace with a secure password
 }
 
-# SQL Database (Corrected)
+# SQL Database
 resource "azurerm_mssql_database" "sql_database" {
-  name        = "subscriptionservicedb"
+  name        = "subscriptionservicedb-${var.environment}"
   server_id   = azurerm_mssql_server.sql_server.id
   sku_name    = "S0" # Define the Standard performance tier
   max_size_gb = 10
+}
+
+# App Service
+resource "azurerm_linux_web_app" "main" {
+  name                = "subservappservice-${var.environment}"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.main.name
+  service_plan_id     = azurerm_service_plan.app_service_plan.id
+
+  site_config {
+    always_on = true
+  }
+
+  app_settings = {
+    "ENVIRONMENT" = var.environment
+  }
 }

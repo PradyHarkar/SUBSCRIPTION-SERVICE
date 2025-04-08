@@ -50,3 +50,11 @@ variable "common_tags" {
     Owner       = "Pradyumna"
   }
 }
+
+variable "environment" {
+  description = "The environment type (e.g., dev, test, prod)"
+}
+
+variable "subscription_id" {
+  description = "Azure subscription ID"
+}
