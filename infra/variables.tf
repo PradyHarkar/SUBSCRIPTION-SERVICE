@@ -46,16 +46,17 @@ variable "admin_password" {
 variable "common_tags" {
   description = "Tags for Azure resources"
   default     = {
-    Environment = "Dev"
+    Environment = "dev"
     Owner       = "Pradyumna"
   }
 }
 
 variable "environment" {
   description = "The environment type (e.g., dev, test, prod)"
+  default = "dev"
 }
 
 variable "subscription_id" {
   description = "Azure subscription ID"
-  type = string
+  default     = "26801b16-02f0-458e-8e42-863e8c56e2f8"
 }
