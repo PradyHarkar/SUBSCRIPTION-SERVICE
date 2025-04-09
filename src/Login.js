@@ -7,7 +7,7 @@ function Login() {
   const handleSubmit = (event) => {
     event.preventDefault();
     console.log(`Login Attempt: ${email}, ${password}`);
-    // Azure AD Integration will go here.
+    // Azure ADIntegration will go here.
   };
 
   return (
