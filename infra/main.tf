@@ -11,6 +11,10 @@ data "azurerm_client_config" "current" {}
 resource "azurerm_resource_group" "main" {
   name = "rg-${replace(var.environment, "/", "-")}-subscriptionservice"
   location = var.location
+    lifecycle {
+    ignore_changes = all
+  }
+
 }
 
 # Service Plan
