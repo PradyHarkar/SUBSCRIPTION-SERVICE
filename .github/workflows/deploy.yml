@@ -8,7 +8,6 @@ on:
       - main
   workflow_dispatch: # Allow manual triggering of this workflow
 
-    
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,10 +18,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
-      
+
       - name: Set Environment Variables
         run: |
           if [[ "${{ env.ENVIRONMENT }}" == "dev" ]]; then
@@ -43,23 +42,35 @@ jobs:
           fi
 
       - name: Azure CLI Login
-        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+        run: az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./infra # Ensure Terraform runs in the correct directory
+        working-directory: ./infra
 
       - name: Import Existing Resource Group
-        run: terraform import -var "environment=dev" -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" azurerm_resource_group.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-dev-subscriptionservice
+        run: terraform import azurerm_resource_group.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-dev-subscriptionservice
+        working-directory: ./infra
+
+      - name: Import App Service Plan
+        run: terraform import azurerm_service_plan.app_service_plan /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-dev-subscriptionservice/providers/Microsoft.Web/serverFarms/subscriptionserviceplan-dev
+        working-directory: ./infra
+
+      - name: Import Key Vault
+        run: terraform import azurerm_key_vault.key_vault /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-dev-subscriptionservice/providers/Microsoft.KeyVault/vaults/subservkv-dev
+        working-directory: ./infra
+
+      - name: Import SQL Server
+        run: terraform import azurerm_mssql_server.sql_server /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-dev-subscriptionservice/providers/Microsoft.Sql/servers/subscriptionservicesqlserver-dev
         working-directory: ./infra
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" -var "environment=${{ env.ENVIRONMENT }}"
-        working-directory: ./infra # Ensure Terraform runs in the correct directory
+        working-directory: ./infra
 
       - name: Deploy Application to Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: subservappservice-${{ env.ENVIRONMENT }} # App name with dynamic environment
+          app-name: subservappservice-dev
           slot-name: production
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
