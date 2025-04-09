@@ -63,11 +63,17 @@ jobs:
       - name: Import SQL Server
         run: terraform import azurerm_mssql_server.sql_server /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-dev-subscriptionservice/providers/Microsoft.Sql/servers/subscriptionservicesqlserver-dev
         working-directory: ./infra
-
+    
+      - name: Terraform Import Existing Resources
+        run: |
+          terraform import azurerm_mssql_database.sql_database /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-dev-subscriptionservice/providers/Microsoft.Sql/servers/subscriptionservicesqlserver-dev/databases/subscriptionservicedb-dev
+          terraform import azurerm_linux_web_app.main /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-dev-subscriptionservice/providers/Microsoft.Web/sites/subservappservice-dev
+        working-directory: ./infra
+        
       - name: Terraform Apply
         run: terraform apply -auto-approve -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" -var "environment=${{ env.ENVIRONMENT }}"
         working-directory: ./infra
-
+        
       - name: Deploy Application to Azure
         uses: azure/webapps-deploy@v2
         with:
